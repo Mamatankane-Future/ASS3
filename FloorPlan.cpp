@@ -59,7 +59,7 @@ std::vector<std::string> FloorPlan::split(const std::string& s, char delimiter) 
 }
 
 
-void FloorPlan::createShape(char type, const glm::vec3& position, const glm::vec3& size) {
+void FloorPlan::createShape(int type, const glm::vec3& position, const glm::vec3& size) {
     if (shapeCount == shapeCapacity) {
         expandShapeArray();
     }

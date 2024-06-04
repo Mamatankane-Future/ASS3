@@ -24,15 +24,6 @@ class CompositeShape : public Shape{
 
         CompositeShape(int numShapes) : numShapes(numShapes){}
 
-        void scaleShape(glm::vec3 scale){
-            IdentityMatrix t(4);
-            t[0][0] = scale.x;
-            t[1][1] = scale.y;
-            t[2][2] = scale.z;
-
-            this->transform(t);
-        }
-
         void rotate(double cosValue, double sinValue, int index1, int index2, bool reverse = false) override {
             IdentityMatrix toOrigin(4);
             toOrigin[0][3] = -origin[0];
@@ -63,17 +54,32 @@ class CompositeShape : public Shape{
             moveScene(origin, 3, transform);
         }
 
-        void transform(Matrix& scaleMatrix) {
-            // Apply scaling transformation to each individual shape in the composite shape
-            for (int i = 0; i < numShapes; ++i) {
-                // Apply scaling transformation to vertices of the current shape
-                moveScene(shapes[i]->vertices, shapes[i]->verticesSize, scaleMatrix);
-                // Apply scaling transformation to origin of the current shape
-                moveScene(shapes[i]->origin, 3, scaleMatrix);
-            }
+        void scaleShape(glm::vec3 scale) {
+            IdentityMatrix toOrigin(4);
+            toOrigin[0][3] = -origin[0];
+            toOrigin[1][3] = -origin[1];
+            toOrigin[2][3] = -origin[2];
 
-            // Apply scaling transformation to the origin of the composite shape itself
-            moveScene(origin, 3, scaleMatrix);
+            IdentityMatrix toOriginal(4);
+            toOriginal[0][3] = origin[0];
+            toOriginal[1][3] = origin[1];
+            toOriginal[2][3] = origin[2];
+
+            IdentityMatrix scaleMatrix(4);
+            scaleMatrix[0][0] = scale.x;
+            scaleMatrix[1][1] = scale.y;
+            scaleMatrix[2][2] = scale.z;
+
+            Matrix transform = toOriginal * scaleMatrix * toOrigin;
+            applyTransform(transform);
+        }
+
+        void applyTransform(Matrix& transform) {
+            for (int i = 0; i < numShapes; ++i) {
+                moveScene(shapes[i]->vertices, shapes[i]->verticesSize, transform);
+                moveScene(shapes[i]->origin, 3, transform);
+            }
+            moveScene(origin, 3, transform);
         }
 
 
@@ -114,14 +120,13 @@ class roundedTable : public CompositeShape{
             //apply scaling
            
 
-            float tabletopColor[4] = {0.0f, 1.0f, 0.0f, 1.0f};
-            float tableBaseColor[4] = {1.0f, 0.0f, 0.0f, 1.0f};
-            float tableNeckColor[4] = {0.0f, 0.0f, 1.0f, 1.0f};
+            float tabletopColor[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+            float tableNeckColor[4] = {0.0f, 0.0f, 0.0f, 1.0f};
 
             //shape creation
-            Shape *tableTop = new Cylinder(0.3,0.2,CompositeShape::CYLINDER_VERTICES,tabletopCenter,tabletopColor);
+            Shape *tableTop = new Cylinder(0.3,0.08,CompositeShape::CYLINDER_VERTICES,tabletopCenter,tabletopColor);
             Shape *tableNeck = new Cylinder(0.05,0.4,CompositeShape::CYLINDER_VERTICES,tableNeckCenter,tableNeckColor);
-            Shape *tableBase = new Cylinder(0.2,0.1,CompositeShape::CYLINDER_VERTICES,tableBaseCenter,tableBaseColor);
+            Shape *tableBase = new Cylinder(0.2,0.05,CompositeShape::CYLINDER_VERTICES,tableBaseCenter,tableNeckColor);
 
             //add shapes to array
             shapes = new Shape * [numShapes]{tableTop, tableNeck, tableBase}; 
@@ -280,7 +285,6 @@ class TwoLeggedRoundedTable : public CompositeShape{
 
             //shape population
             shapes = new Shape * [numShapes]{base1, base2, neck, tableTop};
-
             scaleShape(scale);
         }
 };

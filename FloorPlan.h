@@ -21,7 +21,7 @@ private:
     int shapeCapacity;
 
     void readFile(const std::string& filename);
-    void createShape(char type, const glm::vec3& position, const glm::vec3& size);
+    void createShape(int type, const glm::vec3& position, const glm::vec3& size);
     void expandShapeArray();
 };
 
