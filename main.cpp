@@ -20,6 +20,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Camera.h"
+#include "FloorPlan.h"
 
 using namespace glm;
 using namespace std;
@@ -799,6 +800,7 @@ int main()
 
 
     Scene scene;
+    FloorPlan floorPlan("floor.txt");
     float vertices[20] = {
                 -0.4f, -0.75f, 0.98f,  0.0f, 0.0f,
                 -0.4f,  0.8f, 0.98f,  1.0f, 0.0f,
@@ -870,6 +872,7 @@ int main()
 
         glUseProgram(programID);
         scene.draw(type);
+        floorPlan.draw(type);
         
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
@@ -917,8 +920,8 @@ int main()
         }
 
         if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS){
-            camera.ProcessKeyboard(-1, deltaTime);
-            camera2.ProcessKeyboard(-1, deltaTime);
+            camera.ProcessKeyboard(-7, deltaTime);
+            camera2.ProcessKeyboard(-7, deltaTime);
         }
         if (GLFW_PRESS && glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS){
             camera.ProcessKeyboard(-8, deltaTime); 

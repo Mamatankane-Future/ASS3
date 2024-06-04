@@ -1,5 +1,5 @@
 #add all the files that you need to the files makefile variable below as a space seperated list
-files = Vector.cpp Matrix.cpp Wall.cpp Camera.cpp
+files = Vector.cpp Matrix.cpp Wall.cpp Camera.cpp FloorPlan.cpp
 
 main: main.cpp glad.c
 	g++ -g shader.cpp $(files) main.cpp glad.c -lglfw -pthread -lGLEW -ldl -lGL -o main
