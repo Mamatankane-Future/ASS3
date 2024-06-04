@@ -2,6 +2,9 @@
 #define SHAPES_H
 
 #include <iostream>
+#include <GL/glew.h>
+#include <vector>
+#include "Matrix.h"
 using namespace std;
 
 class Shape{
@@ -109,7 +112,7 @@ class Shape{
 
 //////////////////////////////////////////////Glass class///////////////////////////////////////////////////
 
-class Glass : public Shape{
+/*class Glass : public Shape{
 private:
 
     int currentColor = 0;
@@ -268,141 +271,142 @@ public:
         glDeleteBuffers(1, &CBO);
     }
 };
+*/
 
 //////////////////////////////////////////////Wall class///////////////////////////////////////////////////
-class Wall : public Shape{
-private:
+// class Wall : public Shape{
+// private:
 
-    int currentColor = 1;
+//     int currentColor = 1;
 
-    const float colors[11][4] = {
-        {0.0f, 1.0f, 0.0f, 1.0f},
-        {1.0f, 0.0f, 0.0f, 1.0f},
-        {0.0f, 0.0f, 1.0f, 1.0f},
+//     const float colors[11][4] = {
+//         {0.0f, 1.0f, 0.0f, 1.0f},
+//         {1.0f, 0.0f, 0.0f, 1.0f},
+//         {0.0f, 0.0f, 1.0f, 1.0f},
 
-        {1.0f, 1.0f, 1.0f, 1.0f},
-        {0.0f, 0.0f, 0.0f, 1.0f},
+//         {1.0f, 1.0f, 1.0f, 1.0f},
+//         {0.0f, 0.0f, 0.0f, 1.0f},
 
-        {1.0f, 0.0f, 1.0f, 1.0f},
-        {1.0f, 1.0f, 0.0f, 1.0f},
-        {0.0f, 1.0f, 1.0f, 1.0f},
+//         {1.0f, 0.0f, 1.0f, 1.0f},
+//         {1.0f, 1.0f, 0.0f, 1.0f},
+//         {0.0f, 1.0f, 1.0f, 1.0f},
 
-        {0.0f, 0.5f, 0.5f, 1.0f},
-        {0.5f, 0.5f, 0.0f, 1.0f},
-        {0.5f, 0.0f, 0.5f, 1.0f}
-    };
+//         {0.0f, 0.5f, 0.5f, 1.0f},
+//         {0.5f, 0.5f, 0.0f, 1.0f},
+//         {0.5f, 0.0f, 0.5f, 1.0f}
+//     };
      
-public:
-    Wall(float width, float height, int x, int y, float p[]){
-        glGenVertexArrays(1, &VAO);
-        glBindVertexArray(VAO);
-        glGenBuffers(1, &VBO);
-        glGenBuffers(1, &EBO);
-        glGenBuffers(1, &CBO);
+// public:
+//     Wall(float width, float height, int x, int y, float p[]){
+//         glGenVertexArrays(1, &VAO);
+//         glBindVertexArray(VAO);
+//         glGenBuffers(1, &VBO);
+//         glGenBuffers(1, &EBO);
+//         glGenBuffers(1, &CBO);
 
-        for(int i = 0; i < 3; i++){
-            origin[i] = p[i];
-        }
+//         for(int i = 0; i < 3; i++){
+//             origin[i] = p[i];
+//         }
 
 
-        float incX = width / x;
-        float incY = height / y;
+//         float incX = width / x;
+//         float incY = height / y;
 
-        x++;
-        y++;
+//         x++;
+//         y++;
 
-        verticesSize = x * y * 3;
+//         verticesSize = x * y * 3;
         
 
-        vertices = new float[verticesSize]{};
-        int k = 0;
+//         vertices = new float[verticesSize]{};
+//         int k = 0;
 
-        for (int i = 0; i < x; i++){
-            for (int j = 0; j < y; j++){
-                vertices[k++] = origin[0] + i * incX;
-                vertices[k++] = origin[1] + j * incY;
-                vertices[k++] = origin[2];
-            }
-        }
+//         for (int i = 0; i < x; i++){
+//             for (int j = 0; j < y; j++){
+//                 vertices[k++] = origin[0] + i * incX;
+//                 vertices[k++] = origin[1] + j * incY;
+//                 vertices[k++] = origin[2];
+//             }
+//         }
 
 
-        indicesSize = (x - 1) * (y - 1) * 6;
+//         indicesSize = (x - 1) * (y - 1) * 6;
 
     
-        indices = new unsigned int[indicesSize]{};
+//         indices = new unsigned int[indicesSize]{};
 
-        k = 0;
-        for (int i = 0; i < x - 1; i++){
-            editIndices(y, k, i * y);
-        }
+//         k = 0;
+//         for (int i = 0; i < x - 1; i++){
+//             editIndices(y, k, i * y);
+//         }
 
-        for (int i = 0; i < x - 1; i++){
-            editIndicesReverse(y, k, i * y);
-        } 
+//         for (int i = 0; i < x - 1; i++){
+//             editIndicesReverse(y, k, i * y);
+//         } 
 
-        colorsSize = x * y * 4;
+//         colorsSize = x * y * 4;
 
-        color = new float[colorsSize];
-        for (size_t i = 0; i < colorsSize; i)
-        {
-            color[i++] = colors[currentColor][0];
-            color[i++] = colors[currentColor][1];
-            color[i++] = colors[currentColor][2];
-            color[i++] = colors[currentColor][3];
-        }
+//         color = new float[colorsSize];
+//         for (size_t i = 0; i < colorsSize; i)
+//         {
+//             color[i++] = colors[currentColor][0];
+//             color[i++] = colors[currentColor][1];
+//             color[i++] = colors[currentColor][2];
+//             color[i++] = colors[currentColor][3];
+//         }
 
-    }
+//     }
 
-    void editIndices(int rects, int &k, int offset){
-        for (int i = 0; i < rects - 1; i++){
-            indices[k++] = i + offset; 
-            indices[k++] = i + 1 + offset;
-            indices[k++] = rects + i + offset;
-        }
-    }
+//     void editIndices(int rects, int &k, int offset){
+//         for (int i = 0; i < rects - 1; i++){
+//             indices[k++] = i + offset; 
+//             indices[k++] = i + 1 + offset;
+//             indices[k++] = rects + i + offset;
+//         }
+//     }
 
-    void editIndicesReverse(int rects, int &k, int offset){
-        for (int i = 0; i < rects - 1; i++){
-            indices[k++] = rects + i + offset + 1;
-            indices[k++] = i + 1 + offset;
-            indices[k++] = rects + i + offset;
-        }
-    }
-
-
+//     void editIndicesReverse(int rects, int &k, int offset){
+//         for (int i = 0; i < rects - 1; i++){
+//             indices[k++] = rects + i + offset + 1;
+//             indices[k++] = i + 1 + offset;
+//             indices[k++] = rects + i + offset;
+//         }
+//     }
 
 
-    void draw(bool type=true){
-        wire_frame(type, VAO, VBO, EBO, vertices, indices, verticesSize*sizeof(float), indicesSize*sizeof(unsigned int), CBO, color, colorsSize*sizeof(float));
-    }
 
-    void changeColor(int by){
-        currentColor += by;
-        if (currentColor > 10){
-            currentColor = 0;
-        } else if (currentColor < 0){
-            currentColor = 10;
-        }
 
-        for (size_t i = 0; i < colorsSize; i)
-        {
-            color[i++] = colors[currentColor][0];
-            color[i++] = colors[currentColor][1];
-            color[i++] = colors[currentColor][2];
-            color[i++] = colors[currentColor][3];
-        }
-    }
+//     void draw(bool type=true){
+//         wire_frame(type, VAO, VBO, EBO, vertices, indices, verticesSize*sizeof(float), indicesSize*sizeof(unsigned int), CBO, color, colorsSize*sizeof(float));
+//     }
 
-    ~Wall(){
-        delete[] vertices;
-        delete[] indices;
-        delete[] color;
-        glDeleteVertexArrays(1, &VAO);
-        glDeleteBuffers(1, &VBO);
-        glDeleteBuffers(1, &EBO);
-        glDeleteBuffers(1, &CBO);
-    }
-};
+//     void changeColor(int by){
+//         currentColor += by;
+//         if (currentColor > 10){
+//             currentColor = 0;
+//         } else if (currentColor < 0){
+//             currentColor = 10;
+//         }
+
+//         for (size_t i = 0; i < colorsSize; i)
+//         {
+//             color[i++] = colors[currentColor][0];
+//             color[i++] = colors[currentColor][1];
+//             color[i++] = colors[currentColor][2];
+//             color[i++] = colors[currentColor][3];
+//         }
+//     }
+
+//     ~Wall(){
+//         delete[] vertices;
+//         delete[] indices;
+//         delete[] color;
+//         glDeleteVertexArrays(1, &VAO);
+//         glDeleteBuffers(1, &VBO);
+//         glDeleteBuffers(1, &EBO);
+//         glDeleteBuffers(1, &CBO);
+//     }
+// };
 
 
 ////////////////////////////////////Cuboid////////////////////////////////////////
@@ -410,7 +414,6 @@ public:
 class Cuboid : public Shape {
 private: 
     int currentColor = 2;
-    Glass *cuboid;
 public:    
     const float colors[11][4] = {
     {0.0f, 1.0f, 0.0f, 1.0f},
