@@ -15,7 +15,7 @@
 
 #include "Matrix.h"
 
-// #include "CompositeShape.h"
+#include "CompositeShape.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
