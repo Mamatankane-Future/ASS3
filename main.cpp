@@ -17,6 +17,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "Camera.h"
 
 using namespace glm;
 using namespace std;
@@ -773,22 +774,6 @@ public:
 };
 
 
-enum ProjectionType {
-    PERSPECTIVE,
-    ORTHOGRAPHIC
-};
-
-ProjectionType currentProjection = PERSPECTIVE; 
-// ProjectionType currentColor = ORTHOGRAPHIC;
-
-void toggleProjection() {
-    if (currentProjection == PERSPECTIVE) {
-        currentProjection = ORTHOGRAPHIC;
-    } else {
-        currentProjection = PERSPECTIVE;
-    }
-}
-
 
 int main()
 {
@@ -807,13 +792,16 @@ int main()
 
     unsigned int programID = LoadShaders("vertex.glsl", "fragment.glsl");
 
+    Camera camera(glm::vec3(0.0f, 0.0f, -0.5f), glm::vec3(0.0f, 1.0f, 0.0f), 90.0f, 0.0f);
+    Camera camera2(glm::vec3(0.0f, 0.0f, -0.7f), glm::vec3(0.0f, 1.0f, 0.0f), 90.0f, 0.0f);
+
 
     Scene scene;
     float vertices[20] = {
-                -0.4f, -0.75f, 0.93f,  0.0f, 0.0f,
-                -0.4f,  0.8f, 0.93f,  1.0f, 0.0f,
-                0.4f, -0.75f, 0.93f,  1.0f, 1.0f,
-                0.4f,  0.8f, 0.93f,  0.0f, 1.0f};
+                -0.4f, -0.75f, 0.98f,  0.0f, 0.0f,
+                -0.4f,  0.8f, 0.98f,  1.0f, 0.0f,
+                0.4f, -0.75f, 0.98f,  1.0f, 1.0f,
+                0.4f,  0.8f, 0.98f,  0.0f, 1.0f};
     Wall wall("table.jpg", vertices);
 
     glm::mat4 perspectiveProjection;
@@ -826,15 +814,8 @@ int main()
     float far = 100.0f;
     perspectiveProjection = glm::perspective(glm::radians(fov), aspectRatio, near, far);
 
-    // Set up the initial orthographic projection matrix
-    float left = -3.0f;
-    float right = 3.0f;
-    float bottom = -2.0f;
-    float top = 2.0f;
-    orthoProjection = glm::ortho(left, right, bottom, top, near, far);
 
     GLuint projectionMatrixLocation = glGetUniformLocation(programID, "projectionMatrix");
-    GLuint projectionMatrixLocationW = glGetUniformLocation(wall.getShaderProgram(), "projectionMatrix");
 
 
     const float TOGGLE_DELAY = 0.2f;
@@ -844,8 +825,15 @@ int main()
     const float yrotationAngle = 0.02f;
     const float zrotationAngle = 0.02f;
 
+    bool isPerspective = true;
+
+    glm::mat4 view;
+
+    float deltaTime = 0.0f;
+    float lastFrame = 0.0f;
 
     while (!glfwWindowShouldClose(window)) {
+
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
         glEnable(GL_BLEND);  
@@ -854,17 +842,16 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  
 
-        // Choose the current projection matrix
-        glm::mat4 projectionMatrix;
-        if (currentProjection == PERSPECTIVE) {
-            projectionMatrix = perspectiveProjection;
-        } else {
-            projectionMatrix = orthoProjection;
-        }
+        if (isPerspective) view = camera.GetViewMatrix();
+        else view = camera2.GetViewMatrix();
 
+        glm::mat projectionMatrix = perspectiveProjection* view;
+       
         // Set the projection matrix uniform in your shader program
         glUniformMatrix4fv(projectionMatrixLocation, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-        glUniformMatrix4fv(projectionMatrixLocationW, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+        // glUniformMatrix4fv(projectionMatrixLocationW, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+
+
         
 
         if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS)
@@ -881,90 +868,70 @@ int main()
 
         glUseProgram(programID);
         scene.draw(type);
-        // glUseProgram(wall.getShaderProgram());
-        wall.draw();
-
         
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
 
-        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-        {
+
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
+            camera.ProcessKeyboard(1, deltaTime);
+            camera2.ProcessKeyboard(1, deltaTime);
+        }
+        
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
+            camera.ProcessKeyboard(2, deltaTime);
+            camera2.ProcessKeyboard(2, deltaTime);
+        }
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
+            camera.ProcessKeyboard(3, deltaTime);
+            camera2.ProcessKeyboard(3, deltaTime);
+        }
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
+            camera.ProcessKeyboard(4, deltaTime);
+            camera2.ProcessKeyboard(4, deltaTime);
+        }
             
-            scene.rotate(cos(zrotationAngle), sin(zrotationAngle), 0, 1);
-            wall.rotate(cos(zrotationAngle), sin(zrotationAngle), 0, 1, false);
+        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS){
+            camera.ProcessKeyboard(5, deltaTime);
+            camera2.ProcessKeyboard(5, deltaTime);
         }
-        else if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-        {
-            scene.rotate(cos(-zrotationAngle), sin(-zrotationAngle), 0, 1);
-            wall.rotate(cos(-zrotationAngle), sin(-zrotationAngle), 0, 1, false);
-
+             
+        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS){
+            camera.ProcessKeyboard(6, deltaTime);
+            camera2.ProcessKeyboard(6, deltaTime);
         }
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        {
-            scene.rotate(cos(xrotationAngle), sin(xrotationAngle), 1, 2);
-            wall.rotate(cos(xrotationAngle), sin(xrotationAngle), 1, 2, false);
+        if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS){
+            camera.ProcessKeyboard(7, deltaTime);
+            camera2.ProcessKeyboard(7, deltaTime);
         }
-        else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        {
-            scene.rotate(cos(-xrotationAngle), sin(-xrotationAngle), 1, 2);
-            wall.rotate(cos(-xrotationAngle), sin(-xrotationAngle), 1, 2, false);
+        if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS){
+            camera.ProcessKeyboard(8, deltaTime);
+            camera2.ProcessKeyboard(8, deltaTime);
         }
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        {
-            scene.rotate(cos(yrotationAngle), sin(yrotationAngle), 0, 2, true);
-            wall.rotate(cos(yrotationAngle), sin(yrotationAngle), 0, 2, true);
-        }
-        else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        {
-            scene.rotate(cos(-yrotationAngle), sin(-yrotationAngle), 0, 2, true);
-            wall.rotate(cos(-yrotationAngle), sin(-yrotationAngle), 0, 2, true);
-    
-        }
-        else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-        {
-            scene.move(0, 0.03, 0);
-            wall.move(0, 0.03, 0);
-        }
-        else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-        {
-            scene.move(0, -0.03, 0);
-            wall.move(0, -0.03, 0);
-        }
-        else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-        {
-            scene.move(-0.03, 0, 0);
-            wall.move(-0.03, 0, 0);
-        }
-        else if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-        {
-            scene.move(0.03, 0, 0);
-            wall.move(0.03, 0, 0);
-        }
-        else if (glfwGetKey(window, GLFW_KEY_KP_ADD) == GLFW_PRESS)
-        {
-            if (currentProjection == PERSPECTIVE) {
-                scene.move(0, 0, 0.03);
-                wall.move(0, 0, 0.03);
-            } else {
-                scene.scale(1.03, 1.03, 1.03);
-                wall.scale(1.03, 1.03, 1.03);
-            }
-        }
-        else if (glfwGetKey(window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS)
-        {
-            if (currentProjection == PERSPECTIVE) {
-                scene.move(0, 0, -0.03);
-                wall.move(0, 0, -0.03);
-            } else {
-                scene.scale(0.97, 0.97, 0.97);
-                wall.scale(0.97, 0.97, 0.97);
-            }
+        if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS){
+            camera.ProcessKeyboard(9, deltaTime);
+            camera2.ProcessKeyboard(9, deltaTime);
         }
 
-        if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
-        {
-            toggleProjection();
+        if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS){
+            camera.ProcessKeyboard(-1, deltaTime);
+            camera2.ProcessKeyboard(-1, deltaTime);
+        }
+        if (GLFW_PRESS && glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS){
+            camera.ProcessKeyboard(-8, deltaTime); 
+            camera2.ProcessKeyboard(-8, deltaTime);
+        } 
+        if (GLFW_PRESS && glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS){
+            camera.ProcessKeyboard(-9, deltaTime); 
+            camera2.ProcessKeyboard(-9, deltaTime);
         }
 
+
+        if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS)
+        {
+            isPerspective = !isPerspective;
+        }
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -974,3 +941,5 @@ int main()
 
     glfwTerminate();
 }
+
+
